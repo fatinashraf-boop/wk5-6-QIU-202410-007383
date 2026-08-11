@@ -17,63 +17,131 @@ For each test case, write a short comment explaining WHICH category from
 the mind-map it represents and WHY you chose it.
 """
 import pytest
-from csp_map_coloring import backtracking_search, is_consistent
+
+from csp_map_coloring import (
+    backtracking_search,
+    is_consistent
+)
 
 
 def _is_valid_solution(solution, variables, neighbours):
-    """Helper: check a solution assigns every variable and breaks no
-    adjacency constraint. Already implemented -- reuse this in your tests.
     """
+    Helper: check a solution assigns every variable and breaks no
+    adjacency constraint.
+    """
+
     if solution is None:
         return False
+
     if set(solution.keys()) != set(variables):
         return False
+
     for var, value in solution.items():
         for neighbour in neighbours[var]:
-            if neighbour in solution and solution[neighbour] == value:
-                return False
+            if neighbour in solution:
+                if solution[neighbour] == value:
+                    return False
+
     return True
 
 
 # ---------------------------------------------------------------------
-# GIVEN EXAMPLE -- complete, do not modify. Use this as your template.
-# Category: typical/normal small solvable case (from the mind-map:
-# "Solvability -> solvable case").
+# GIVEN EXAMPLE -- complete, do not modify.
+#
+# Category: typical/normal small solvable case
 # ---------------------------------------------------------------------
+
 def test_given_example():
-    # backtracking_search() in this starter file is wired to the fixed
-    # Australia map problem (VARIABLES / NEIGHBOURS / DOMAIN, all module
-    # level in csp_map_coloring.py), so this test solves that real problem.
+
     from csp_map_coloring import VARIABLES, NEIGHBOURS, DOMAIN
 
     solution = backtracking_search(VARIABLES, DOMAIN)
 
     assert solution is not None
-    assert _is_valid_solution(solution, VARIABLES, NEIGHBOURS)
+    assert _is_valid_solution(
+        solution,
+        VARIABLES,
+        NEIGHBOURS
+    )
 
 
 # ---------------------------------------------------------------------
-# TODO Test Case 1
-# Which mind-map category does this represent? (edit this comment)
+# Test Case 1
+#
+# Category: typical/solvable case
+#
+# This checks that the solver can find a valid colouring using
+# the required three-colour domain.
 # ---------------------------------------------------------------------
+
 def test_case_1():
-    raise NotImplementedError("TODO: design and implement test case 1")
+
+    from csp_map_coloring import VARIABLES, NEIGHBOURS
+
+    domain = ["Red", "Green", "Blue"]
+
+    solution = backtracking_search(
+        VARIABLES,
+        domain
+    )
+
+    assert solution is not None
+
+    assert _is_valid_solution(
+        solution,
+        VARIABLES,
+        NEIGHBOURS
+    )
 
 
 # ---------------------------------------------------------------------
-# TODO Test Case 2
-# Which mind-map category does this represent? (edit this comment)
+# Test Case 2
+#
+# Category: edge/boundary case
+#
+# Tasmania has no neighbours. This test verifies that an isolated
+# variable can still be assigned a valid colour.
 # ---------------------------------------------------------------------
+
 def test_case_2():
-    raise NotImplementedError("TODO: design and implement test case 2")
+
+    from csp_map_coloring import VARIABLES, NEIGHBOURS
+
+    assignment = {
+        "T": "Red"
+    }
+
+    # T has no neighbours, so assigning Red must be consistent.
+    assert is_consistent(
+        assignment,
+        "T",
+        "Green"
+    )
+
+    assert NEIGHBOURS["T"] == []
 
 
 # ---------------------------------------------------------------------
-# TODO Test Case 3
-# Which mind-map category does this represent? (edit this comment)
+# Test Case 3
+#
+# Category: unsolvable / over-constrained case
+#
+# The Australia map cannot be coloured using only two colours.
+# The solver should therefore return None after backtracking.
 # ---------------------------------------------------------------------
+
 def test_case_3():
-    raise NotImplementedError("TODO: design and implement test case 3")
+
+    from csp_map_coloring import VARIABLES
+
+    domain = ["Red", "Green"]
+
+    solution = backtracking_search(
+        VARIABLES,
+        domain
+    )
+
+    assert solution is None
 
 
 if __name__ == "__main__":

@@ -9,71 +9,105 @@ signatures (the tests in test_csp_map_coloring.py rely on them).
 The problem: colour a map of Australia's 7 regions so that no two adjacent
 regions share a colour, using only 3 colours.
 """
-
 VARIABLES = ["WA", "NT", "SA", "Q", "NSW", "V", "T"]
 
-# Adjacency list: which regions border which. T (Tasmania) is an island --
-# it has no neighbours, so it's unconstrained.
 NEIGHBOURS = {
-    "WA":  ["NT", "SA"],
-    "NT":  ["WA", "SA", "Q"],
-    "SA":  ["WA", "NT", "Q", "NSW", "V"],
-    "Q":   ["NT", "SA", "NSW"],
+    "WA": ["NT", "SA"],
+    "NT": ["WA", "SA", "Q"],
+    "SA": ["WA", "NT", "Q", "NSW", "V"],
+    "Q": ["NT", "SA", "NSW"],
     "NSW": ["SA", "Q", "V"],
-    "V":   ["SA", "NSW"],
-    "T":   [],
+    "V": ["SA", "NSW"],
+    "T": [],
 }
 
 DOMAIN = ["Red", "Green", "Blue"]
 
 
 def is_consistent(assignment, var, value):
-    """TODO: return True if assigning `value` to `var` does not conflict
-    with any already-assigned neighbour of `var`.
-
-    `assignment` is a dict {variable: value} of variables assigned so far.
-    Use NEIGHBOURS[var] to find which variables to check against.
     """
-    raise NotImplementedError("TODO: implement is_consistent()")
+    Return True if assigning value to var does not conflict
+    with any already-assigned neighbour.
+    """
+
+    for neighbour in NEIGHBOURS[var]:
+
+        if neighbour in assignment:
+            if assignment[neighbour] == value:
+                return False
+
+    return True
 
 
 def select_unassigned_variable(assignment):
-    """TODO: return the name of a variable from VARIABLES that is not yet
-    a key in `assignment`. Return None if all variables are assigned.
-
-    A simple valid strategy: return the first unassigned variable in
-    VARIABLES order. (Bonus/optional: implement the MRV heuristic instead
-    -- see ../guide.md section 3.)
     """
-    raise NotImplementedError("TODO: implement select_unassigned_variable()")
+    Return the first variable that has not been assigned.
+
+    Return None when all variables have been assigned.
+    """
+
+    for var in VARIABLES:
+
+        if var not in assignment:
+            return var
+
+    return None
 
 
 def backtracking_search(variables, domain):
-    """TODO: run backtracking search and return a complete, consistent
-    assignment (dict {variable: value}), or None if no solution exists.
-
-    Follow the pseudocode in ../guide.md section 2:
-      1. If the assignment is complete, return it.
-      2. Otherwise pick an unassigned variable (select_unassigned_variable).
-      3. Try each value in `domain` for that variable, in order.
-      4. If is_consistent(), tentatively assign it and recurse.
-      5. If the recursive call succeeds, return its result.
-      6. If it fails, undo the assignment (backtrack) and try the next
-         value.
-      7. If no value works, return None (failure) so the caller backtracks
-         further.
-
-    Tip: write a helper function backtrack(assignment) and call it with
-    an empty dict to start.
     """
-    raise NotImplementedError("TODO: implement backtracking_search()")
+    Run backtracking search.
+
+    Returns:
+        A complete and consistent assignment, or None
+        if no solution exists.
+    """
+
+    assignment = {}
+
+    def backtrack():
+
+        # 1. Check whether assignment is complete
+        if len(assignment) == len(variables):
+            return dict(assignment)
+
+        # 2. Select an unassigned variable
+        var = select_unassigned_variable(assignment)
+
+        # 3. Try every value in the domain
+        for value in domain:
+
+            # 4. Check consistency
+            if is_consistent(assignment, var, value):
+
+                # Tentatively assign the value
+                assignment[var] = value
+
+                # 5. Recursively search
+                result = backtrack()
+
+                if result is not None:
+                    return result
+
+                # 6. Backtrack
+                del assignment[var]
+
+        # 7. No value worked
+        return None
+
+    return backtrack()
 
 
 if __name__ == "__main__":
+
     solution = backtracking_search(VARIABLES, DOMAIN)
+
     if solution:
+
         print("Solution found:")
+
         for region in VARIABLES:
             print(f"  {region}: {solution[region]}")
+
     else:
         print("No solution exists with this domain.")
